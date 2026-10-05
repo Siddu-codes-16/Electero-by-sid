@@ -29,7 +29,7 @@
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/Electero.git
+git clone https://github.com/siddu-codes-16/Electero.git
 cd Electero
 ```
 
@@ -142,7 +142,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Author
 
-Built with ❤️ by an electronics enthusiast
+Built with ❤️ by an TECH enthusiast
 
 ## Acknowledgments
 
