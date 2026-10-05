@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Voltage Divider Calculator - Electero{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">⚡ Voltage Divider Calculator</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        Design voltage divider networks. Enter your input/output voltages and optionally specify resistor values.
+    </p>
+
+    <form id="vd-form">
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="vin">Input Voltage (Vin)</label>
+                <input type="number" id="vin" step="0.1" value="12" required>
+                <small style="color: var(--text-secondary);">Supply voltage</small>
+            </div>
+
+            <div class="form-group">
+                <label for="vout">Desired Output Voltage (Vout)</label>
+                <input type="number" id="vout" step="0.1" value="5" required>
+                <small style="color: var(--text-secondary);">Target output voltage</small>
+            </div>
+
+            <div class="form-group">
+                <label for="r1">R1 (Optional)</label>
+                <input type="number" id="r1" step="1" placeholder="Leave empty to calculate">
+                <small style="color: var(--text-secondary);">Top resistor in ohms</small>
+            </div>
+
+            <div class="form-group">
+                <label for="r2">R2 (Optional)</label>
+                <input type="number" id="r2" step="1" placeholder="Leave empty to calculate">
+                <small style="color: var(--text-secondary);">Bottom resistor in ohms</small>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Calculate</button>
+    </form>
+
+    <div id="vd-result-section" class="hidden" style="margin-top: 30px;">
+        <h3 style="color: var(--primary-color); margin-bottom: 20px;">Results</h3>
+        <div class="result-box" id="vd-results">
+            <!-- Results will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="card-title">📖 Circuit Diagram</h3>
+    <div style="text-align: center; padding: 30px; background: var(--input-bg); border-radius: 6px;">
+        <pre style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.8;">
+    Vin ───┬───[ R1 ]───┬─── Vout
+           │            │
+          ═══          [ R2 ]
+          GND           │
+                       GND
+        </pre>
+    </div>
+    <div style="background: var(--input-bg); padding: 20px; border-radius: 6px; margin-top: 20px; font-family: monospace;">
+        <p><strong>Vout = Vin × (R2 / (R1 + R2))</strong></p>
+    </div>
+</div>
+{% endblock %}

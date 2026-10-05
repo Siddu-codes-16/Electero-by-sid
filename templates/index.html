@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Electero - Home{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="text-align: center; margin-bottom: 10px;">Welcome to Electero ⚡</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 40px;">
+        Your comprehensive electronics design assistant. Calculate component values, design filters, and decode resistor codes with ease.
+    </p>
+
+    <div class="grid-3">
+        <a href="/led" class="feature-card">
+            <div class="feature-icon">💡</div>
+            <h3>LED Calculator</h3>
+            <p>Calculate the perfect resistor value for your LED circuits</p>
+        </a>
+
+        <a href="/voltage-divider" class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Voltage Divider</h3>
+            <p>Design voltage divider networks with standard component values</p>
+        </a>
+
+        <a href="/color-code" class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Color Code</h3>
+            <p>Decode and encode resistor color bands instantly</p>
+        </a>
+
+        <a href="/filter" class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Filter Designer</h3>
+            <p>Design RC filters with frequency response plots</p>
+        </a>
+
+        <a href="/history" class="feature-card">
+            <div class="feature-icon">📜</div>
+            <h3>History</h3>
+            <p>View and manage your calculation history</p>
+        </a>
+
+        <div class="feature-card" style="opacity: 0.6; cursor: default;">
+            <div class="feature-icon">🔧</div>
+            <h3>More Tools</h3>
+            <p>Coming soon: Ohm's Law, 555 Timer, Op-Amp calculators</p>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3 class="card-title">Why Electero?</h3>
+        <ul style="color: var(--text-secondary); line-height: 2;">
+            <li>✅ Accurate calculations based on standard formulas</li>
+            <li>✅ Standard component value recommendations (E12/E24 series)</li>
+            <li>✅ Visual resistor color code display</li>
+            <li>✅ Frequency response plots for filters</li>
+            <li>✅ Save and revisit your calculations</li>
+            <li>✅ Clean, modern interface</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">Quick Start</h3>
+        <ol style="color: var(--text-secondary); line-height: 2;">
+            <li>Select a calculator from the navigation menu</li>
+            <li>Enter your circuit parameters</li>
+            <li>Click calculate to get instant results</li>
+            <li>View standard component recommendations</li>
+            <li>Check your calculation history anytime</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

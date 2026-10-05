@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}RC Filter Designer - Electero{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">📊 RC Filter Designer</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        Design RC low-pass or high-pass filters with frequency response visualization.
+    </p>
+
+    <form id="filter-form">
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="filter-type">Filter Type</label>
+                <select id="filter-type" required>
+                    <option value="lowpass">Low-Pass Filter</option>
+                    <option value="highpass">High-Pass Filter</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cutoff-freq">Cutoff Frequency (Hz)</label>
+                <input type="number" id="cutoff-freq" step="0.1" value="1000" required>
+                <small style="color: var(--text-secondary);">-3dB point</small>
+            </div>
+
+            <div class="form-group">
+                <label for="impedance">Impedance (Ω)</label>
+                <input type="number" id="impedance" step="1" value="10000" required>
+                <small style="color: var(--text-secondary);">Resistor value (default 10kΩ)</small>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Design Filter</button>
+    </form>
+
+    <div id="filter-result-section" class="hidden" style="margin-top: 30px;">
+        <h3 style="color: var(--primary-color); margin-bottom: 20px;">Component Values</h3>
+        <div class="result-box">
+            <div class="result-item">
+                <span class="result-label">Resistor:</span>
+                <span class="result-value highlight" id="filter-resistor">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Calculated Capacitor:</span>
+                <span class="result-value" id="filter-capacitor-calc">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Standard Capacitor:</span>
+                <span class="result-value highlight" id="filter-capacitor-std">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Actual Cutoff Frequency:</span>
+                <span class="result-value" id="filter-cutoff-actual">-</span>
+            </div>
+        </div>
+
+        <h3 style="color: var(--primary-color); margin-top: 30px; margin-bottom: 20px;">Frequency Response</h3>
+        <div class="chart-container">
+            <canvas id="frequency-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="card-title">📖 Filter Types</h3>
+    <div class="grid-2">
+        <div style="background: var(--input-bg); padding: 20px; border-radius: 6px;">
+            <h4 style="color: var(--primary-color);">Low-Pass Filter</h4>
+            <p style="color: var(--text-secondary); margin-top: 10px;">
+                Allows low frequencies to pass through while attenuating high frequencies.
+            </p>
+            <pre style="color: var(--text-secondary); margin-top: 15px;">
+    In ───[ R ]───┬─── Out
+                  │
+                 ═══ C
+                  │
+                 GND
+            </pre>
+            <p style="font-family: monospace; margin-top: 15px;">fc = 1 / (2π × R × C)</p>
+        </div>
+
+        <div style="background: var(--input-bg); padding: 20px; border-radius: 6px;">
+            <h4 style="color: var(--primary-color);">High-Pass Filter</h4>
+            <p style="color: var(--text-secondary); margin-top: 10px;">
+                Allows high frequencies to pass through while attenuating low frequencies.
+            </p>
+            <pre style="color: var(--text-secondary); margin-top: 15px;">
+    In ───═══───┬─── Out
+            C   │
+               [ R ]
+                │
+               GND
+            </pre>
+            <p style="font-family: monospace; margin-top: 15px;">fc = 1 / (2π × R × C)</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let frequencyChart = null;
+
+document.getElementById('filter-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const filterType = document.getElementById('filter-type').value;
+    const cutoffFreq = parseFloat(document.getElementById('cutoff-freq').value);
+    const impedance = parseFloat(document.getElementById('impedance').value);
+
+    try {
+        const response = await fetch('/api/calculate/filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filter_type: filterType,
+                cutoff_freq: cutoffFreq,
+                impedance: impedance
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+            alert(result.error);
+            return;
+        }
+
+        // Display results
+        document.getElementById('filter-resistor').textContent = `${result.resistor} Ω`;
+        document.getElementById('filter-capacitor-calc').textContent =
+            `${result.calculated_capacitor_f.toExponential(2)} F`;
+        document.getElementById('filter-capacitor-std').textContent =
+            result.standard_capacitor_readable;
+        document.getElementById('filter-cutoff-actual').textContent =
+            `${result.actual_cutoff_hz} Hz`;
+
+        // Plot frequency response
+        plotFrequencyResponse(result.frequencies, result.magnitude_db);
+
+        document.getElementById('filter-result-section').classList.remove('hidden');
+
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+
+function plotFrequencyResponse(frequencies, magnitudes) {
+    const ctx = document.getElementById('frequency-chart').getContext('2d');
+
+    if (frequencyChart) {
+        frequencyChart.destroy();
+    }
+
+    frequencyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: frequencies,
+            datasets: [{
+                label: 'Magnitude (dB)',
+                data: magnitudes,
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'logarithmic',
+                    title: {
+                        display: true,
+                        text: 'Frequency (Hz)',
+                        color: '#94a3b8'
+                    },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: '#334155' }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Magnitude (dB)',
+                        color: '#94a3b8'
+                    },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: '#334155' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
